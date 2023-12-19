@@ -169,6 +169,10 @@ def change_password():
         cedula = data['cedula']
         currentPassword = data['currentPassword']
         newPassword = data['newPassword']
+        
+        if ' ' in newPassword:
+            return jsonify({'success': False, 'message': 'La contraseña no puede contener espacios'}), 400
+
 
         conn = pyodbc.connect(conn_string)
         cursor = conn.cursor()
@@ -176,7 +180,7 @@ def change_password():
         # Comprueba la contraseña actual
         cursor.execute("SELECT password FROM dbo.CLI_CLIENTES WHERE Ruc = ?", cedula)
         record = cursor.fetchone()
-        if record and record.password == currentPassword:
+        if record and record.password.strip == currentPassword:
             # Cambia la contraseña
             cursor.execute("UPDATE dbo.CLI_CLIENTES SET password = ? WHERE Ruc = ?", newPassword, cedula)
             conn.commit()
